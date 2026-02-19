@@ -5,15 +5,26 @@ const morgan = require("morgan");
 
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
+const errorMiddleware = require("./middlewares/errorMiddleware");
+const apiLimiter = require("./middlewares/rateLimiteMiddleware");
 const app = express();
 
-app.use(cors());
+app.use(cors(
+    {
+        // empece les appels depuis les sites inconnues
+        origin: process.env.CLIENT_URL,
+        methods:["GET" , "POST" , "PUT" , "DELETE"],
+        credentials:true
+    }
+
+));
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
 
 // Routes API
-
+app.use("/api", apiLimiter);
 app.use("/api/categories" , categoryRoutes);
 app.use("/api/products" , productRoutes);
+app.use(errorMiddleware);
 module.exports = app;
