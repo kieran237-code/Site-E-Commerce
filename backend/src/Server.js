@@ -3,6 +3,7 @@ const sequelize = require("./config/database");
 require("dotenv").config();
 require("./models")
 require("./models/Admin");
+require("./models/Image");
 const PORT = process.env.PORT|| 5000;
 (async () => {
     try{

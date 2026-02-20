@@ -1,4 +1,4 @@
-const {Category, Product, ProductImage} = require("../models");
+const {Category, Product, Image} = require("../models");
 
 // GET /api/categories pour recuperer toutes les categories
 
@@ -22,7 +22,7 @@ exports.getProductsByCategory = async(req, res, next) => {
             where: {slug},
             include:{
                 model: Product,
-                include: [ProductImage]
+                include: [Image]
             }
         });
         if(!category){
@@ -33,4 +33,18 @@ exports.getProductsByCategory = async(req, res, next) => {
     }catch(error){
         next(error);
     }
-}
+},
+
+
+
+
+exports.create = async (req, res, next) => {
+    try {
+        // Tu n'as pas besoin d'envoyer le slug dans req.body,
+        // le hook du modèle s'en occupe !
+        const category = await Category.create(req.body);
+        res.status(201).json(category);
+    } catch (err) {
+        next(err);
+    }
+};

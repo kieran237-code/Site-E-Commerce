@@ -1,11 +1,11 @@
-const {Product, Category, ProductImage} = require("../models");
+const {Product, Category, Image} = require("../models");
 
 // GET /api/products retourner tous les produits
 
 exports.getAllProduct = async(req, res, next) =>{
     try{
         const products = await Product.findAll({
-            include:[Category , ProductImage],
+            include:[Category , Image],
             order: [["createdAt" , "DESC"]]
         });
         res.status(200).json(products);
@@ -21,7 +21,7 @@ exports.getProductBySlug = async(req, res, next) =>{
         const {slug} = req.params;
         const product = await Product.findOne({
             where:{slug},
-            include: [Category , ProductImage]
+            include: [Category , Image]
         });
 
         if(!product){
