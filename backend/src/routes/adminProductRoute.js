@@ -4,7 +4,7 @@ const auth = require("../middlewares/authMiddleware");
 const controller = require("../controllers/adminProductController");
 const categoryController = require("../controllers/categoryController");
 const uploader = require("../middlewares/uploadMiddleware"); 
-
+const ProductController = require("../controllers/productController")
 router.post(
     "/products", 
     auth, 
@@ -22,5 +22,5 @@ router.put(
 router.delete("/products/:id", auth, controller.remove);
 
 router.post("/categories", auth, categoryController.create);
-
+router.get("/produit", auth, ProductController.getAllProduct)
 module.exports = router;
