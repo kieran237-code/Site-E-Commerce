@@ -83,3 +83,21 @@ exports.remove = async (req, res, next) => {
         next(err);
     }
 };
+
+exports.deleteImage = async (req, res, next) => {
+    try {
+        const { imageId } = req.params;
+        const img = await image.findByPk(imageId); 
+        if (!img) {
+            return res.status(404).json({ message: "Image non trouvée" });
+        }
+        if (img.public_id) {
+            await cloudinary.uploader.destroy(img.public_id);
+        }
+        await img.destroy();
+
+        res.json({ message: "Image supprimée avec succès" });
+    } catch (err) {
+        next(err);
+    }
+};

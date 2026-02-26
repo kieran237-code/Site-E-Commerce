@@ -1,4 +1,4 @@
-const {DataTypes, where} = require("sequelize");
+const {DataTypes, Op} = require("sequelize");
 const sequelize = require("../config/database");
 const slugify = require("../utils/slugify")
 
@@ -89,7 +89,7 @@ const Product = sequelize.define ("Product", {
                 await Product.findOne({
                     where:{
                         slug,
-                        id:{[sequelize.Op.ne]:product.id}
+                        id:{[Op.ne]:product.id}
                     }
                 })
             ) 

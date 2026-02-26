@@ -22,5 +22,7 @@ router.put(
 router.delete("/products/:id", auth, controller.remove);
 
 router.post("/categories", auth, categoryController.create);
-router.get("/produit", auth, ProductController.getAllProduct)
+router.get("/produit", auth, ProductController.getAllProduct);
+router.delete("/images/:imageId", auth, controller.deleteImage);
+router.delete("/categories/:id", auth, categoryController.remove);;
 module.exports = router;

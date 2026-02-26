@@ -1,66 +1,182 @@
-import React from 'react'
-import { ShoppingBag, ArrowLeft } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { ShoppingBag, ArrowLeft, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link, useParams } from "react-router-dom"
-import products from '../productsContent'
-import Footer from '../components/Footer'
+import axios from 'axios'
+import { FaWhatsapp } from 'react-icons/fa'
 
 const ProductDetails = () => {
+  const { slug } = useParams(); 
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [mainImage, setMainImage] = useState("");
 
-  const { id } = useParams();
-  const product = products.find((p) => p.id === parseInt(id));
-  if (!product) {
-    return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <h2 className="text-2xl font-bold">Produit introuvable</h2>
-        <Link to="/" className="text-blue-600 hover:underline">Retour à l'accueil</Link>
-      </div>
-    );
-  }
+  const WHATSAPP_NUMBER = "237697284828"; 
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`http://localhost:5000/api/products/${slug}`);
+        setProduct(res.data);
+        if (res.data.Images && res.data.Images.length > 0) {
+          setMainImage(res.data.Images[0].url);
+        }
+      } catch (err) {
+        console.error("Erreur:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [slug]);
+
+  // --- LOGIQUE D'ENVOI WHATSAPP ---
+  const handleOrder = () => {
+    if (!product) return;
+
+    const currentUrl = window.location.href;
+    const priceFormatted = Number(product.price).toLocaleString();
+ 
+    const message = 
+      `*MURIEL LUXURY BEAUTY*%0A` +
+      `--------------------------%0A%0A` +
+      `Bonjour, *je suis intéressé par ce produit, est-il encore disponible ?*%0A%0A` +
+      `*DÉTAILS DU PRODUIT :*%0A` +
+      `• *Nom :* ${product.name}%0A` +
+      `• *Prix :* ${priceFormatted} FCFA%0A` +
+      `• *Couleur :* ${product.color || 'N/A'}%0A%0A` +
+      `*Image :* ${mainImage}`;
+
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+  };
+
+  const handlePrev = () => {
+    const currentIndex = product.Images.findIndex(img => img.url === mainImage);
+    const prevIndex = (currentIndex - 1 + product.Images.length) % product.Images.length;
+    setMainImage(product.Images[prevIndex].url);
+  };
+
+  const handleNext = () => {
+    const currentIndex = product.Images.findIndex(img => img.url === mainImage);
+    const nextIndex = (currentIndex + 1) % product.Images.length;
+    setMainImage(product.Images[nextIndex].url);
+  };
+
+  if (loading) return (
+    <div className="h-screen flex flex-col items-center justify-center gap-4">
+      <Loader2 className="animate-spin text-zinc-300" size={48} />
+      <p className="text-zinc-400 animate-pulse">Chargement...</p>
+    </div>
+  );
+
+  if (!product) return (
+    <div className="container mx-auto px-4 py-20 text-center">
+      <h2 className="text-2xl font-bold">Produit introuvable</h2>
+      <Link to="/" className="text-blue-600 hover:underline">Retour</Link>
+    </div>
+  );
 
   return (
-    <div className='container mx-auto px-4 py-8'>
-      <div>
-        <Link to="/" className='mb-8 inline-flex items-center gap-2 text-gray-600 hover:text-black transition-colors'>
-          <ArrowLeft size={20} />
-          Retour aux Produits
-        </Link>
+    <div className='container mx-auto px-4 py-8 animate-in fade-in duration-500'>
+      <Link to="/" className='mb-8 inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors font-medium'>
+        <ArrowLeft size={20} />
+        Retour à la boutique
+      </Link>
+      
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-12 items-start'>
         
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-12 items-start'>
-          <div className='shadow-xl p-2 rounded-2xl bg-white'>
+        {/* SECTION IMAGES */}
+        <div className='flex flex-col gap-6'>
+          <div className='relative group shadow-2xl rounded-3xl bg-white overflow-hidden border border-zinc-100 aspect-[4/5]'>
             <img 
-                src={product.image} 
+                src={mainImage || 'https://via.placeholder.com/800x1000'} 
                 alt={product.name} 
-                className="w-full h-auto rounded-xl object-cover"
+                className="w-full h-full object-contain bg-zinc-50 transition-all duration-500"
             />
-          </div>
-          <div className="py-4">
-            {product.is_new === "oui" && (
-                <span className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2 block">Nouveauté</span>
+
+            {product.Images?.length > 1 && (
+              <>
+                <button 
+                  onClick={handlePrev}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg hover:bg-[#2d3748] hover:text-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button 
+                  onClick={handleNext}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg hover:bg-[#2d3748] hover:text-white transition-all opacity-0 group-hover:opacity-100 hidden md:flex"
+                >
+                  <ChevronRight size={24} />
+                </button>
+
+                <div className="absolute bottom-4 right-4 flex gap-2 md:hidden">
+                    <button onClick={handlePrev} className="bg-white p-2 rounded-full shadow-md active:bg-zinc-200"><ChevronLeft size={20}/></button>
+                    <button onClick={handleNext} className="bg-white p-2 rounded-full shadow-md active:bg-zinc-200"><ChevronRight size={20}/></button>
+                </div>
+              </>
             )}
-            <h1 className='text-4xl font-bold mb-4 text-[#2d3748]'>{product.name}</h1>
-            <p className='text-gray-600 mb-8 leading-relaxed text-lg'>
-                {product.description}
-            </p>
-            
-            <div className='mb-8'>
-              <span className='text-3xl font-bold text-[#2d3748]'>{product.price.toLocaleString()} FCFA</span>
-            </div>
-
-            <div className='mb-6'>
-              <h3 className='font-semibold text-sm text-gray-500 uppercase mb-2'>Categorie</h3>
-              <span className='inline-block bg-gray-200 rounded-full px-3 py-1 text-sm'>{product.category}</span>
-              
-            </div>
-
-            <button className='w-full md:w-auto bg-[#2d3748] text-white px-10 py-4 rounded-md flex items-center justify-center gap-3 hover:bg-slate-700 transition-all shadow-lg active:scale-95'>
-              <ShoppingBag size={22}/>
-              Commander ce Produit
-            </button>
           </div>
+          
+          <div className='flex gap-4 overflow-x-auto pb-2 scrollbar-hide'>
+            {product.Images?.map((img) => (
+              <button 
+                key={img.id} 
+                onClick={() => setMainImage(img.url)}
+                className={`shrink-0 w-24 h-28 rounded-xl border-2 transition-all overflow-hidden ${
+                    mainImage === img.url ? 'border-[#2d3748] scale-95 shadow-inner' : 'border-transparent opacity-60 hover:opacity-100'
+                }`}
+              >
+                <img src={img.url} className="w-full h-full object-cover" alt="miniature" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* SECTION INFOS */}
+        <div className="py-4 space-y-6">
+          <div className="flex flex-wrap gap-2">
+            {product.is_new && <span className="bg-orange-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-sm">Nouveau</span>}
+            {product.is_promo && <span className="bg-red-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-sm">Promotion</span>}
+            {product.is_popular && <span className="bg-blue-400 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-lg">Populaire</span>}
+          </div>
+
+          <div className="border-b border-zinc-100 pb-6">
+            <h1 className='text-5xl font-bold mb-2 text-[#2d3748] font-serif italic'>{product.name}</h1>
+            <p className="text-sm text-zinc-400 font-bold uppercase tracking-[0.2em]">{product.color}</p>
+          </div>
+          
+          <div className='flex items-center gap-4'>
+            <span className='text-4xl font-black text-[#2d3748]'>
+                {Number(product.price).toLocaleString()} <span className='text-xl'>FCFA</span>
+            </span>
+          </div>
+
+          <div className="bg-zinc-50 p-6 rounded-2xl">
+              <h3 className="text-[10px] font-black uppercase text-zinc-400 mb-2">Description du produit</h3>
+              <p className='text-gray-600 leading-relaxed text-lg italic'>
+                  {product.description || "Aucune description disponible."}
+              </p>
+          </div>
+          
+          <div className='grid grid-cols-2 gap-6'>
+            <div className="p-4 border border-zinc-100 rounded-2xl">
+              <h3 className='font-black text-[10px] text-gray-400 uppercase mb-1'>Catégorie</h3>
+              <span className='font-bold text-[#2d3748]'>{product.Category?.name}</span>
+            </div>
+          </div>
+
+          {/* BOUTON COMMANDE */}
+          <button 
+            onClick={handleOrder}
+            disabled={product.stock <= 0}
+            className={`w-full bg-[#2d3748] text-white px-10 py-5 rounded-2xl flex items-center justify-center gap-4 hover:bg-slate-700 transition-all shadow-2xl active:scale-95 disabled:bg-zinc-300 disabled:cursor-not-allowed`}
+          >
+            <FaWhatsapp size={24}/>
+            <span className="font-black uppercase tracking-widest text-sm">Passer la commande </span>
+          </button>
         </div>
       </div>
     </div>
-    
   )
 }
 

@@ -9,7 +9,7 @@ exports.getAllCategories = async(req, res, next)=>{
         });
         res.status(200).json(categories);
     } catch(err){
-        res.status(500).json({error: err.message})
+        next(err);
     }
 };
 
@@ -33,17 +33,33 @@ exports.getProductsByCategory = async(req, res, next) => {
     }catch(error){
         next(error);
     }
-},
+};
 
 
 
 
 exports.create = async (req, res, next) => {
     try {
-        // Tu n'as pas besoin d'envoyer le slug dans req.body,
-        // le hook du modèle s'en occupe !
+
         const category = await Category.create(req.body);
         res.status(201).json(category);
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.remove = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const deleted = await Category.destroy({
+            where: { id: id }
+        });
+
+        if (deleted === 0) {
+            return res.status(404).json({ message: "Catégorie non trouvée" });
+        }
+
+        res.json({ message: "Catégorie supprimée avec succès" });
     } catch (err) {
         next(err);
     }
