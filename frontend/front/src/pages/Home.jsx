@@ -5,11 +5,13 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, EffectFade } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-fade';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   const sliderImages = [
     "https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=1600",
@@ -24,7 +26,7 @@ const Home = () => {
       try {
         setLoading(true);
         const response = await axios.get(`${API_URL}/categories`);
-        setCategories([{ id: 'all', name: 'Tous' }, ...response.data]);
+        setCategories([{ id: 'all', name: t("all") }, ...response.data]);
       } catch (error) {
         console.error("Erreur catégories :", error);
       } finally {
@@ -32,12 +34,11 @@ const Home = () => {
       }
     };
     fetchCategories();
-  }, []);
+  }, [t]);
 
   return (
     <div className="min-h-screen bg-white">
-      
-    
+      {/* Slider */}
       <div className='relative h-[400px] md:h-[500px] w-full overflow-hidden mb-12'>
         <Swiper
           modules={[Autoplay, EffectFade]}
@@ -52,7 +53,6 @@ const Home = () => {
                 className="w-full h-full bg-cover bg-center transition-transform duration-[4000ms] scale-110"
                 style={{ backgroundImage: `url(${img})` }}
               >
-                
                 <div className="absolute inset-0 bg-black/40" />
               </div>
             </SwiperSlide>
@@ -61,20 +61,20 @@ const Home = () => {
 
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white text-center px-4">
           <h1 className="text-5xl md:text-7xl font-serif italic mb-4 drop-shadow-lg">
-            Nos Collections
+            {t("collections")}
           </h1>
           <p className="text-sm md:text-base uppercase tracking-[0.4em] font-light opacity-90 drop-shadow-md">
-            L'essence du luxe & de la beauté
+            {t("subtitle")}
           </p>
         </div>
       </div>
 
+      {/* Categories */}
       <div className='container mx-auto px-4'>
-      
         <div className='flex flex-wrap gap-3 mb-12 justify-center'>
           {loading ? (
             <div className="flex gap-3">
-               {[1,2,3,4].map(i => <div key={i} className="h-10 w-24 bg-zinc-100 animate-pulse rounded-full"></div>)}
+              {[1,2,3,4].map(i => <div key={i} className="h-10 w-24 bg-zinc-100 animate-pulse rounded-full"></div>)}
             </div>
           ) : (
             categories.map((cat) => (
@@ -93,7 +93,7 @@ const Home = () => {
           )}
         </div>
 
-      
+        {/* Product Grid */}
         <ProductGrid selectedCategory={selectedCategory} />
       </div>
     </div>

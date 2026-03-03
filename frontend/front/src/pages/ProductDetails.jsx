@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react'
-import { ShoppingBag, ArrowLeft, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Link, useParams } from "react-router-dom"
-import axios from 'axios'
-import { FaWhatsapp } from 'react-icons/fa'
-
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link, useParams } from "react-router-dom";
+import axios from 'axios';
+import { FaWhatsapp } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
+import { translateText } from '../utils/translate';
 const ProductDetails = () => {
   const { slug } = useParams(); 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState("");
+   const [translatedDescription, setTranslatedDescription] = useState("");
+  const { t , i18n } = useTranslation();
 
   const WHATSAPP_NUMBER = "237697284828"; 
 
@@ -21,6 +24,13 @@ const ProductDetails = () => {
         if (res.data.Images && res.data.Images.length > 0) {
           setMainImage(res.data.Images[0].url);
         }
+         // Traduire la description automatiquement selon la langue active 
+         if (res.data.description) 
+          {
+                const translated = await translateText(res.data.description, i18n.language.toUpperCase());
+                setTranslatedDescription(translated);
+          }
+
       } catch (err) {
         console.error("Erreur:", err);
       } finally {
@@ -28,24 +38,21 @@ const ProductDetails = () => {
       }
     };
     fetchProduct();
-  }, [slug]);
+  }, [slug, i18n.language]);
 
-  // --- LOGIQUE D'ENVOI WHATSAPP ---
   const handleOrder = () => {
     if (!product) return;
 
-    const currentUrl = window.location.href;
     const priceFormatted = Number(product.price).toLocaleString();
- 
     const message = 
       `*MURIEL LUXURY BEAUTY*%0A` +
       `--------------------------%0A%0A` +
-      `Bonjour, *je suis intéressé par ce produit, est-il encore disponible ?*%0A%0A` +
-      `*DÉTAILS DU PRODUIT :*%0A` +
-      `• *Nom :* ${product.name}%0A` +
-      `• *Prix :* ${priceFormatted} FCFA%0A` +
-      `• *Couleur :* ${product.color || 'N/A'}%0A%0A` +
-      `*Image :* ${mainImage}`;
+      `${t("whatsapp_intro")}%0A%0A` +
+      `*${t("details")} :*%0A` +
+      `• *${t("name")}:* ${product.name}%0A` +
+      `• *${t("price")}:* ${priceFormatted} FCFA%0A` +
+      `• *${t("color")}:* ${product.color || 'N/A'}%0A%0A` +
+      `*${t("image")}:* ${mainImage}`;
 
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
   };
@@ -65,14 +72,14 @@ const ProductDetails = () => {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4">
       <Loader2 className="animate-spin text-zinc-300" size={48} />
-      <p className="text-zinc-400 animate-pulse">Chargement...</p>
+      <p className="text-zinc-400 animate-pulse">{t("loading")}</p>
     </div>
   );
 
   if (!product) return (
     <div className="container mx-auto px-4 py-20 text-center">
-      <h2 className="text-2xl font-bold">Produit introuvable</h2>
-      <Link to="/" className="text-blue-600 hover:underline">Retour</Link>
+      <h2 className="text-2xl font-bold">{t("not_found")}</h2>
+      <Link to="/" className="text-blue-600 hover:underline">{t("back")}</Link>
     </div>
   );
 
@@ -80,12 +87,12 @@ const ProductDetails = () => {
     <div className='container mx-auto px-4 py-8 animate-in fade-in duration-500'>
       <Link to="/" className='mb-8 inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors font-medium'>
         <ArrowLeft size={20} />
-        Retour à la boutique
+        {t("back_to_shop")}
       </Link>
       
       <div className='grid grid-cols-1 md:grid-cols-2 gap-12 items-start'>
-        
         {/* SECTION IMAGES */}
+                {/* SECTION IMAGES */}
         <div className='flex flex-col gap-6'>
           <div className='relative group shadow-2xl rounded-3xl bg-white overflow-hidden border border-zinc-100 aspect-[4/5]'>
             <img 
@@ -135,9 +142,9 @@ const ProductDetails = () => {
         {/* SECTION INFOS */}
         <div className="py-4 space-y-6">
           <div className="flex flex-wrap gap-2">
-            {product.is_new && <span className="bg-orange-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-sm">Nouveau</span>}
-            {product.is_promo && <span className="bg-red-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-sm">Promotion</span>}
-            {product.is_popular && <span className="bg-blue-400 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-lg">Populaire</span>}
+            {product.is_new && <span className="bg-orange-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase">{t("new")}</span>}
+            {product.is_promo && <span className="bg-red-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase">{t("promo")}</span>}
+            {product.is_popular && <span className="bg-blue-400 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase">{t("popular")}</span>}
           </div>
 
           <div className="border-b border-zinc-100 pb-6">
@@ -147,20 +154,20 @@ const ProductDetails = () => {
           
           <div className='flex items-center gap-4'>
             <span className='text-4xl font-black text-[#2d3748]'>
-                {Number(product.price).toLocaleString()} <span className='text-xl'>FCFA</span>
+              {Number(product.price).toLocaleString()} <span className='text-xl'>FCFA</span>
             </span>
           </div>
 
           <div className="bg-zinc-50 p-6 rounded-2xl">
-              <h3 className="text-[10px] font-black uppercase text-zinc-400 mb-2">Description du produit</h3>
+              <h3 className="text-[10px] font-black uppercase text-zinc-400 mb-2">{t("description_title")}</h3>
               <p className='text-gray-600 leading-relaxed text-lg italic'>
-                  {product.description || "Aucune description disponible."}
+                   {translatedDescription || product.description || t("no_description")}
               </p>
           </div>
           
           <div className='grid grid-cols-2 gap-6'>
             <div className="p-4 border border-zinc-100 rounded-2xl">
-              <h3 className='font-black text-[10px] text-gray-400 uppercase mb-1'>Catégorie</h3>
+              <h3 className='font-black text-[10px] text-gray-400 uppercase mb-1'>{t("category")}</h3>
               <span className='font-bold text-[#2d3748]'>{product.Category?.name}</span>
             </div>
           </div>
@@ -172,12 +179,12 @@ const ProductDetails = () => {
             className={`w-full bg-[#2d3748] text-white px-10 py-5 rounded-2xl flex items-center justify-center gap-4 hover:bg-slate-700 transition-all shadow-2xl active:scale-95 disabled:bg-zinc-300 disabled:cursor-not-allowed`}
           >
             <FaWhatsapp size={24}/>
-            <span className="font-black uppercase tracking-widest text-sm">Passer la commande </span>
+            <span className="font-black uppercase tracking-widest text-sm">{t("order_button")}</span>
           </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductDetails
+export default ProductDetails;
