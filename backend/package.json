@@ -7,7 +7,8 @@
     "start": "nodemon src/Server.js",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "seed": "sequelize-cli db:seed:all --config src/config/database.js --seeders-path src/seeders --env development" 
   },
   "keywords": [],
   "author": "",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
+    "sequelize-cli": "^6.6.5",
     "supertest": "^7.2.2"
   }
 }

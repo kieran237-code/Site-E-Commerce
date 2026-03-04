@@ -13,15 +13,14 @@ const errorMiddleware = require("./middlewares/errorMiddleware");
 const apiLimiter = require("./middlewares/rateLimiteMiddleware");
 const app = express();
 
-app.use(cors(
-    {
-        // empece les appels depuis les sites inconnues
-        origin: process.env.CLIENT_URL,
-        methods:["GET" , "POST" , "PUT" , "DELETE"],
-        credentials:true
-    }
+const cors = require("cors");
 
-));
+app.use(cors({
+  origin: "*", 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: false 
+}));
+
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
