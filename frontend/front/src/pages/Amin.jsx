@@ -15,7 +15,7 @@ const Admin = () => {
 
     const navigate = useNavigate();
     const token = localStorage.getItem('adminToken');
-    const API_URL = "http://localhost:5000/api";
+    const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
     useEffect(() => {
         if (!token) { navigate('/connexion'); return; }
@@ -115,7 +115,7 @@ const ProductList = ({ products, setView, onDelete, onEdit }) => {
         if (!window.confirm("Supprimer ce produit définitivement ?")) return;
         try {
             const token = localStorage.getItem('adminToken');
-            await axios.delete(`http://localhost:5000/api/admin/products/${id}`, {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/products/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             onDelete();
@@ -186,7 +186,7 @@ const EditProductModal = ({ product, categories, onClose, onSuccess, inputStyle 
     const [loading, setLoading] = useState(false);
     const [deletingImgId, setDeletingImgId] = useState(null);
 
-    const API_URL = "http://localhost:5000/api";
+    const API_URL = `${import.meta.env.VITE_API_URL}/api`;
     const token = localStorage.getItem('adminToken');
 
     const handleDeleteImage = async (imageId) => {
@@ -408,7 +408,7 @@ const AddCategoryForm = ({ onSuccess, inputStyle, btnStyle }) => {
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
-    const API_URL = "http://localhost:5000/api";
+    const API_URL = `${import.meta.env.VITE_API_URL}/api`;
     const token = localStorage.getItem('adminToken');
 
     
@@ -544,7 +544,7 @@ const AddProductForm = ({ categories, onSuccess, inputStyle, btnStyle }) => {
         Array.from(files).forEach(file => data.append('images', file));
         try {
             const token = localStorage.getItem('adminToken');
-            await axios.post('http://localhost:5000/api/admin/products', data, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/products`, data, { headers: { Authorization: `Bearer ${token}` } });
             onSuccess();
         } catch (err) { alert("Erreur"); }
         finally { setLoading(false); }

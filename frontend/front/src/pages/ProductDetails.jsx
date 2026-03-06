@@ -19,7 +19,7 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/products/${slug}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/${slug}`);
         setProduct(res.data);
         if (res.data.Images && res.data.Images.length > 0) {
           setMainImage(res.data.Images[0].url);

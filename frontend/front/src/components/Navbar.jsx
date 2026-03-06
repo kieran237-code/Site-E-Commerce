@@ -19,7 +19,7 @@ const Navbar = () => {
       if (searchTerm.trim().length >= 2) {
         setIsSearching(true);
         try {
-          const res = await axios.get(`http://localhost:5000/api/product/search?q=${searchTerm}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/product/search?q=${searchTerm}`);
           setResults(res.data.slice(0, 5));
           setShowDropdown(true);
         } catch (err) {

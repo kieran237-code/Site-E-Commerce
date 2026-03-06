@@ -19,7 +19,7 @@ const Home = () => {
     "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&q=80&w=1600"
   ];
 
-  const API_URL = "http://localhost:5000/api";
+  const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
   useEffect(() => {
     const fetchCategories = async () => {
