@@ -1,12 +1,13 @@
 const { Sequelize } = require("sequelize");
 require("dotenv").config();
+
 const config = {
     username: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
-    host: process.env.MYSQLHOST,
-    port: process.env.MYSQLPORT,
-    dialect:  "mysql",
+    password: process.env.MYSQLPASSWORD,  
+    database: process.env.MYSQLDATABASE, 
+    host: process.env.MYSQLHOST,          
+    port: process.env.MYSQLPORT,         
+    dialect: "mysql",
     logging: false
 };
 
@@ -16,10 +17,9 @@ const sequelize = new Sequelize(
     config.password,
     config
 );
-module.exports = sequelize;
 
-module.exports = {
-  development: config,
-  production: config,
-  test: config
-};
+sequelize.development = config;
+sequelize.production = config;
+sequelize.test = config;
+
+module.exports = sequelize;
